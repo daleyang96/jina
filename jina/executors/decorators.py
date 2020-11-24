@@ -244,7 +244,7 @@ def batching(func: Callable[[Any], np.ndarray] = None,
 
             b_size = (batch_size(data) if callable(batch_size) else batch_size) or getattr(args[0], 'batch_size', None)
             # no batching if b_size is None
-            if b_size is None:
+            if b_size is None or data is None:
                 return func(*args, **kwargs)
 
             default_logger.debug(
