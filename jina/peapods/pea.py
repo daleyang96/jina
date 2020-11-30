@@ -62,9 +62,7 @@ class BasePea(metaclass=PeaMeta):
     communicates with others via protobuf and ZeroMQ
     """
 
-    def __init__(self, args: Union['argparse.Namespace', Dict],
-                 is_ready: Optional['Event'] = None,
-                 is_shutdown: Optional['Event'] = None):
+    def __init__(self, args: Union['argparse.Namespace', Dict]):
         """ Create a new :class:`BasePea` object
 
         :param args: the arguments received from the CLI
@@ -74,8 +72,9 @@ class BasePea(metaclass=PeaMeta):
         self.args = args
         self.name = self.__class__.__name__  #: this is the process name
 
-        self.is_ready_event = is_ready or _get_event(self)
-        self.is_shutdown = is_shutdown or _get_event(self)
+        self.is_ready_event = _get_event(self)
+        self.is_shutdown = _get_event(self)
+        self.ready_or_shutdown = _make_or_event(self, self.is_ready_event, self.is_shutdown)
 
         self.last_active_time = time.perf_counter()
         self.last_dump_time = time.perf_counter()
@@ -316,7 +315,6 @@ class BasePea(metaclass=PeaMeta):
 
     def _initialize_executor(self):
         try:
-            self.post_init()
             os.environ['JINA_POD_NAME'] = self.name
             os.environ['JINA_LOG_ID'] = self.args.log_id
             self.load_plugins()
